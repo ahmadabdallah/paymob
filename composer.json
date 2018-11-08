@@ -1,0 +1,31 @@
+{
+    "name": "ahmadabdallah/paymob",
+    "description": "A Package to help with paymob integration",
+    "type": "libbrary",
+    "require": {
+        "php": "^5.5.9 || ^7.0",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ahmad Abbdallah",
+            "email": "ahmadabdallah.r@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Ahmadabdallah\\Paymob\\": "src"
+        },
+        "classmap": [
+            "tests"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ahmadabdallah\\Paymob\\PaymobServiceProvider"
+            ]
+        }
+    }
+}
