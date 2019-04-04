@@ -41,7 +41,7 @@
         "extra": {
             "laravel": {
                 "providers": [
-                    "Ahmadabdallah\\Paymob\\PaymobServiceProvider"
+                    "Ahmadabdallah\\Paymob\\PayMobServiceProvider"
                 ],
                 "aliases" : {
                     "Paymob" : "Ahmadabdallah\\Paymob\\Facades\\Paymob"

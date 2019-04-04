@@ -20,8 +20,7 @@ class PayMob
 
 
     /**
-     * @return mixed|\Psr\Http\Message\ResponseInterface
-     * @throws \Exception
+     * @return mixed
      */
     public function getAuthenticationToken()
     {
@@ -43,7 +42,7 @@ class PayMob
      * @param $amountInCents
      * @param $merchantOrderId
      * @param string $currency
-     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @return mixed
      */
     public function makeOrder($token, $merchantId, $amountInCents, $merchantOrderId, $currency = 'EGP')
     {
@@ -80,7 +79,6 @@ class PayMob
         $currency = 'EGP'
     )
     {
-
         $response = $this->client->request('POST', config('paymob.payment_key_token_endpoint'), [
             'json' => [
                 "auth_token" => $token,
@@ -113,7 +111,7 @@ class PayMob
     /**
      * @param string
      * @param array|$source
-     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @return mixed
      */
     public function createPayRequest($paymentKey, $source)
     {

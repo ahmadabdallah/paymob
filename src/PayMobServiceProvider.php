@@ -4,7 +4,7 @@ namespace Ahmadabdallah\PayMob;
 
 use Illuminate\Support\ServiceProvider;
 
-class PaymobServiceProvider extends ServiceProvider
+class PayMobServiceProvider extends ServiceProvider
 {
     /**
      * Perform post-registration booting of services.
@@ -28,7 +28,7 @@ class PaymobServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind('Paymob', function () {
+        $this->app->bind('PayMob', function () {
             return new PayMob();
         });
 
