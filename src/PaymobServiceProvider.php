@@ -16,7 +16,7 @@ class PaymobServiceProvider extends ServiceProvider
 
         $this->publishes([
             // Config file.
-            __DIR__ . '/config/paymob.php' => config_path('paymob.php'),
+            __DIR__.'/config/paymob.php' => config_path('paymob.php'),
         ]);
 
     }
@@ -28,9 +28,9 @@ class PaymobServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // PayMob Facade.
-        $this->app->singleton('paymob', function () {
+        $this->app->bind('Paymob', function () {
             return new PayMob();
         });
+
     }
 }
