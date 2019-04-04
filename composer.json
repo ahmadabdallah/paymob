@@ -1,31 +1,54 @@
 {
     "name": "ahmadabdallah/paymob",
-    "description": "A Package to help with paymob integration",
-    "type": "libbrary",
+    "description": "A Package to help with Paymob integration",
+    "type": "library",
+    "keywords": [
+        "php",
+        "paymob",
+        "weaccept",
+        "gateway",
+        "online",
+        "payment",
+        "laravel"
+
+    ],
     "require": {
-        "php": "^5.5.9 || ^7.0",
         "guzzlehttp/guzzle": "^6.3"
     },
     "license": "MIT",
     "authors": [
         {
-            "name": "Ahmad Abbdallah",
+            "name": "Ahmad Abdallah",
             "email": "ahmadabdallah.r@gmail.com"
         }
     ],
     "autoload": {
         "psr-4": {
-            "Ahmadabdallah\\Paymob\\": "src"
+            "Ahmadabdallah\\PayMob\\": "src/"
         },
         "classmap": [
             "tests"
         ]
     },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Ahmadabdallah\\Paymob\\PaymobServiceProvider"
-            ]
-        }
+    "autoload-dev": {
+        "psr-4": {
+            "Ahmadabdallah\\PayMob\\Tests\\": "tests/"
+        },
+        "classmap": [
+            "tests"
+        ]
+    },
+        "extra": {
+            "laravel": {
+                "providers": [
+                    "Ahmadabdallah\\Paymob\\PaymobServiceProvider"
+                ],
+                "aliases" : {
+                    "Paymob" : "Ahmadabdallah\\Paymob\\Facades\\Paymob"
+                }
+            }
+        },
+    "require-dev": {
+        "phpunit/phpunit": "^8.0"
     }
 }
