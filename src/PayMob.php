@@ -3,13 +3,19 @@
 namespace Ahmadabdallah\PayMob;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\ClientException;
 
 class PayMob
 {
+    protected $client;
+
+    protected $integrationID;
+
+
     public function __construct()
     {
         $this->client = new Client();
+
+        $this->integrationID = config('paymob.integration_id');
     }
 
 
@@ -17,120 +23,108 @@ class PayMob
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \Exception
      */
-    protected function getAuthenticationToken()
+    public function getAuthenticationToken()
     {
-        try {
-            $response = $this->client->request('POST', 'https://accept.paymobsolutions.com/api/auth/tokens', [
-                'json' => [
-                    "api_key" => config('services.paymob.api_key'),
-                ]
-            ]);
 
-            $response = json_decode($response->getBody()->getContents());
+        $response = $this->client->request('POST', config('paymob.authentication_token_endpoint'), [
+            'json' => [
+                "api_key" => config('paymob.api_key'),
+            ]
+        ]);
 
-        } catch (ClientException $exception) {
-            throw  new \Exception($exception->getMessage());
-        }
-
-        return $response;
+        return json_decode($response->getBody()->getContents());
 
     }
 
 
     /**
+     * @param $token
+     * @param $merchantId
+     * @param $amountInCents
+     * @param $merchantOrderId
+     * @param string $currency
      * @return mixed|\Psr\Http\Message\ResponseInterface
-     * @throws \Exception
      */
-    protected function createOrder()
+    public function makeOrder($token, $merchantId, $amountInCents, $merchantOrderId, $currency = 'EGP')
     {
-        try {
-            $response = $this->client->request('POST', 'https://accept.paymobsolutions.com/api/ecommerce/orders', [
-                'json' => [
-                    "auth_token" => $this->authToken->token,
-                    "delivery_needed" => "false",
-                    "merchant_id" => $this->authToken->profile->id,      // merchant_id obtained from step 1
-                    "amount_cents" => $this->data['amount'],
-                    "currency" => "EGP",
-                    "merchant_order_id" => $this->data['merchant_order_id'],
-                    "items" => [],
-                ]
-            ]);
 
-            $response = json_decode($response->getBody()->getContents());
+        $response = $this->client->request('POST', config('paymob.create_order_endpoint'), [
+            'json' => [
+                'auth_token' => $token,
+                'delivery_needed' => 'false',
+                'merchant_id' => $merchantId,      // merchant_id obtained from step 1
+                'amount_cents' => $amountInCents,
+                'currency' => $currency,
+                'merchant_order_id' => $merchantOrderId,
+                'notify_user_with_email' => true,
+            ]
+        ]);
 
-        } catch (ClientException $exception) {
-            throw new \Exception($exception->getMessage());
-        }
-
-        return $response;
+        return json_decode($response->getBody()->getContents());
     }
 
 
     /**
+     * @param $token
+     * @param $amountCents
+     * @param $orderId
+     * @param $billingData
+     * @param string $currency
      * @return mixed
-     * @throws \Exception
      */
-    protected function createPaymentKeyToken()
+    public function createPaymentKeyToken(
+        $token,
+        $amountCents,
+        $orderId,
+        $billingData,
+        $currency = 'EGP'
+    )
     {
-        try {
-            $response = $this->client->request('POST', 'https://accept.paymobsolutions.com/api/acceptance/payment_keys', [
-                'json' => [
-                    "auth_token" => $this->authToken->token,
-                    "amount_cents" => $this->data['amount'],
-                    "expiration" => 36000,
-                    "order_id" => $this->order->id,    // id obtained in step 2
-                    "currency" => "EGP",
-                    "integration_id" => $this->integrationID, // card integration_id will be provided upon signing up,
-                    "lock_order_when_paid" => "true",
-                    "billing_data" => [
-                        "apartment" => $this->data['apartment'],
-                        "email" => $this->data['email'],
-                        "floor" => $this->data['floor'],
-                        "first_name" => $this->data['first_name'],
-                        "street" => $this->data['street'],
-                        "building" => $this->data['building'],
-                        "phone_number" => $this->data['phone_number'],
-                        "city" => $this->data['city'],
-                        "country" => $this->data['country'],
-                        "last_name" => $this->data['last_name'],
-                    ],
-                ]
-            ]);
 
-            $token = json_decode($response->getBody()->getContents())->token;
+        $response = $this->client->request('POST', config('paymob.payment_key_token_endpoint'), [
+            'json' => [
+                "auth_token" => $token,
+                "amount_cents" => $amountCents,
+                "expiration" => 36000,
+                "order_id" => $orderId,    // id obtained in step 2
+                "currency" => $currency,
+                "integration_id" => $this->integrationID, // card integration_id will be provided upon signing up,
+                "lock_order_when_paid" => "true",
+                "billing_data" => [
+                    "apartment" => $billingData['apartment'],
+                    "email" => $billingData['email'],
+                    "floor" => $billingData['floor'],
+                    "first_name" => $billingData['first_name'],
+                    "street" => $billingData['street'],
+                    "building" => $billingData['building'],
+                    "phone_number" => $billingData['phone_number'],
+                    "city" => $billingData['city'],
+                    "country" => $billingData['country'],
+                    "last_name" => $billingData['last_name'],
+                ],
+            ]
+        ]);
 
-        } catch (ClientException $e) {
-            throw new \Exception($e->getResponse()->getBody());
-        }
-
-        return $token;
+        return json_decode($response->getBody()->getContents())->token;
 
     }
 
 
     /**
-     * @param $data
-     * @param $source
+     * @param string
+     * @param array|$source
      * @return mixed|\Psr\Http\Message\ResponseInterface
-     * @throws \Exception
      */
-    public function createPayRequest($data, $source)
+    public function createPayRequest($paymentKey, $source)
     {
-        try {
-            $response = $this->client->request('POST', 'https://accept.paymobsolutions.com/api/acceptance/payments/pay', [
-                'json' => [
-                    "source" => $source,
-                    "payment_token" => $data['payment_key']
-                ]
-            ]);
+        $response = $this->client->request('POST', config('paymob.pay_request_endpoint'), [
+            'json' => [
+                "source" => $source,
+                "payment_token" => $paymentKey
+            ]
+        ]);
 
-            $response = json_decode($response->getBody()->getContents());
-
-        } catch (ClientException $exception) {
-            throw  new \Exception($exception->getResponse()->getBody());
-        }
-
-        return $response;
+        return json_decode($response->getBody()->getContents());
     }
 
 }
